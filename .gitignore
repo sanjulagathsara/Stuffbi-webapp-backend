@@ -1,0 +1,66 @@
+# ===========================
+# Node
+# ===========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# dotenv environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# logs
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# build output
+dist/
+build/
+
+# temporary files
+*.tmp
+*.temp
+.tmp/
+temp/
+
+# cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# editor / IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# coverage
+coverage/
+.nyc_output/
+
+# Prisma (if used)
+prisma/*.db
+prisma/migrations/*-backup/
+
+# PM2 ecosystem logs
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Docker
+docker-data/
+docker-compose.override.yml
