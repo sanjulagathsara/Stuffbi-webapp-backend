@@ -10,7 +10,7 @@ router.get("/", auth, async (req, res) => {
   try {
     const userId = req.user.sub;
     const { rows } = await pool.query(
-      "SELECT id, name, subtitle FROM items WHERE user_id = $1",
+      "SELECT id, title, subtitle, image_url, bundle_id FROM items WHERE user_id = $1",
       [userId]
     );
     res.json(rows);
