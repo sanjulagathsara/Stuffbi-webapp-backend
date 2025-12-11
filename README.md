@@ -333,3 +333,13 @@ psql -h stuffbi-webapp-db.cze4seka6v7z.eu-north-1.rds.amazonaws.com \
  -d app_db
 
 View tables - \dt
+
+git fetch -
+
+git fetch origin
+git reset --hard origin/main
+
+restart backend - pm2 restart backend --update-env
+
+pm2 status
+pm2 logs backend

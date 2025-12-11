@@ -8,10 +8,7 @@ const pool = require("./config/db");
 const authRoutes = require("./auth/auth.routes");
 const itemRoutes = require("./items/item.routes");
 const bundleRoutes = require("./bundles/bundle.routes");
-const userRoutes = require("./users/user.routes");
-
-
-
+const profileRoutes = require("./profile/profile.routes");
 
 const app = express();
 
@@ -19,18 +16,18 @@ const app = express();
 // CORS CONFIGURATION
 // -----------------------
 const allowedOrigins = [
-  "http://localhost:3000",                                // Local Next.js dev
+  "http://localhost:3000",                               // Local Next.js dev
   "https://stuffbi-webapp-frontend.vercel.app",          // Vercel production domain
   "http://localhost:8080",                               // Flutter web
   "capacitor://localhost",                               // Flutter iOS/Android
   "http://localhost",                                    // Mobile debugging
 ];
 
-// Proper CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman / curl
+      // Allow tools like Postman / curl (no origin)
+      if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
@@ -51,17 +48,23 @@ app.get("/", (req, res) => {
   res.json({ message: "API is running" });
 });
 
+// -----------------------
 // API routes
+// -----------------------
+// You can optionally add "/api" prefix later if you want versioning
 app.use("/auth", authRoutes);
 app.use("/items", itemRoutes);
 app.use("/bundles", bundleRoutes);
-app.use("/users", userRoutes);
+app.use("/profile", profileRoutes); // 👈 profile instead of "users"
 
+// Global error handler (optional, but nice to have)
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ message: "Internal server error" });
+});
 
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-
