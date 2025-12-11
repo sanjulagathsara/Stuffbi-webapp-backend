@@ -6,7 +6,7 @@ const pool = require("../config/db");
  */
 async function getProfileByUserId(userId) {
   const { rows } = await pool.query(
-    `SELECT user_id, display_name, email, avatar_url, phone, created_at, updated_at
+    `SELECT user_id, display_name, avatar_url, phone, created_at, updated_at
      FROM profiles
      WHERE user_id = $1`,
     [userId]
