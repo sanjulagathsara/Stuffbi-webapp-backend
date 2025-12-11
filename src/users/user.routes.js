@@ -1,38 +1,29 @@
-import express from 'express';
+// src/users/user.routes.js
+const express = require("express");
+const pool = require("../config/db");
+const auth = require("../auth/auth.middleware");
 
 const router = express.Router();
 
-// GET route to fetch user data
-router.get('/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        
-        // Example: Fetch user from the database using userId
-        const user = await User.findById(userId); // Replace with your actual database query
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
+// GET /users/me  → return current user profile
+router.get("/me", auth, async (req, res) => {
+  try {
+    const userId = req.user.sub;
 
-        res.json({
-            success: true,
-            data: {
-                userId: user.id,
-                email: user.email,
-                createdAt: user.created_at,
-                role: user.role
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+    const { rows } = await pool.query(
+      "SELECT id, email, role, created_at FROM users WHERE id = $1",
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
     }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("USER ROUTE ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-
-export default router;
+module.exports = router;
