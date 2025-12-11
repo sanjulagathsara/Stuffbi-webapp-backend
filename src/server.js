@@ -9,6 +9,7 @@ const authRoutes = require("./auth/auth.routes");
 const itemRoutes = require("./items/item.routes");
 const bundleRoutes = require("./bundles/bundle.routes");
 const profileRoutes = require("./profile/profile.routes");
+const activityRoutes = require("./activity/activity.routes");
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use("/auth", authRoutes);
 app.use("/items", itemRoutes);
 app.use("/bundles", bundleRoutes);
 app.use("/profile", profileRoutes);
+app.use("/activity", activityRoutes);
 
 // Global error handler (optional, but nice to have)
 app.use((err, req, res, next) => {
