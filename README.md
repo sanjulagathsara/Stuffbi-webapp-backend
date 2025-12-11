@@ -320,6 +320,16 @@ If you want, I can also add a short “Architecture” diagram or a “How this 
 
 ssh to backend EC2
 
-From keys folder - ssh -i stuffbi.pem ubuntu@51.20.116.10
+From keys folder -
+ssh -i stuffbi.pem ubuntu@ec2-51-20-116-10.eu-north-1.compute.amazonaws.com
+or //ssh -i stuffbi.pem ubuntu@51.20.116.10
+
 go into directory - cd /var/www/backend
 Check backend logs - pm2 logs backend
+
+Access Database -
+psql -h stuffbi-webapp-db.cze4seka6v7z.eu-north-1.rds.amazonaws.com \
+ -U app_user \
+ -d app_db
+
+View tables - \dt
