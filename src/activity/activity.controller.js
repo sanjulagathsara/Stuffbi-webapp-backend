@@ -11,44 +11,59 @@ exports.getActivityLogs = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
 
-    let logsQuery;
-    let countQuery;
-    let params;
+    // --------------------------------------------
+    // QUERY: Activity logs + JOIN entity names
+    // --------------------------------------------
+    const logsQuery = `
+      SELECT 
+        a.*,
+        CASE 
+          WHEN a.entity_type = 'bundle' THEN b.title
+          WHEN a.entity_type = 'item' THEN i.name
+          WHEN a.entity_type = 'profile' THEN 'User Profile'
+          ELSE NULL
+        END AS entity_name
+      FROM activity_log a
+      LEFT JOIN bundles b 
+        ON a.entity_type = 'bundle' AND a.entity_id = b.id
+      LEFT JOIN items i 
+        ON a.entity_type = 'item' AND a.entity_id = i.id
+      WHERE ${role === "admin" ? "TRUE" : "a.user_id = $1"}
+      ORDER BY a.created_at DESC
+      LIMIT $2 OFFSET $3
+    `;
 
-    // If admin → fetch all logs
-    if (role === "admin") {
-      logsQuery = `
-        SELECT * FROM activity_log
-        ORDER BY created_at DESC
-        LIMIT $1 OFFSET $2
-      `;
-      countQuery = `SELECT COUNT(*) FROM activity_log`;
-      params = [limit, offset];
-    } 
-    // Normal user → fetch only own logs
-    else {
-      logsQuery = `
-        SELECT * FROM activity_log
-        WHERE user_id = $1
-        ORDER BY created_at DESC
-        LIMIT $2 OFFSET $3
-      `;
-      countQuery = `SELECT COUNT(*) FROM activity_log WHERE user_id = $1`;
-      params = [userId, limit, offset];
-    }
+    const logsParams =
+      role === "admin" ? [limit, offset] : [userId, limit, offset];
 
-    const logsResult = await pool.query(logsQuery, params);
+    // --------------------------------------------
+    // COUNT QUERY
+    // --------------------------------------------
+    const countQuery = role === "admin"
+      ? `SELECT COUNT(*) FROM activity_log`
+      : `SELECT COUNT(*) FROM activity_log WHERE user_id = $1`;
 
-    const countResult = await pool.query(countQuery, role === "admin" ? [] : [userId]);
+    const countParams = role === "admin" ? [] : [userId];
+
+    // --------------------------------------------
+    // EXECUTE QUERIES
+    // --------------------------------------------
+    const logsResult = await pool.query(logsQuery, logsParams);
+    const countResult = await pool.query(countQuery, countParams);
+
     const total = parseInt(countResult.rows[0].count);
 
+    // --------------------------------------------
+    // RESPONSE
+    // --------------------------------------------
     res.json({
       page,
       limit,
       total,
       totalPages: Math.ceil(total / limit),
-      data: logsResult.rows,
+      data: logsResult.rows, // now includes entity_name
     });
+
   } catch (err) {
     console.error("ACTIVITY FETCH ERROR:", err);
     res.status(500).json({ message: "Failed to load activity logs" });
