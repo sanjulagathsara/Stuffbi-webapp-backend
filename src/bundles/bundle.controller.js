@@ -1,47 +1,48 @@
-// src/bundles/bundle.controller.js
-const pool = require("../config/db");
+const bundleService = require("./bundle.service");
+const { logActivity } = require("../activity/activity.service");
 
-// GET /bundles
-async function getBundles(req, res) {
-  try {
-    const userId = req.user.id;
+exports.getBundles = async (req, res) => {
+  const bundles = await bundleService.getBundles(req.user.id);
+  res.json(bundles);
+};
 
-    const { rows } = await pool.query(
-      "SELECT id, title, subtitle, image_url FROM bundles WHERE user_id = $1",
-      [userId]
-    );
+exports.createBundle = async (req, res) => {
+  const bundle = await bundleService.createBundle(
+    req.user.id,
+    req.body.title,
+    req.body.subtitle
+  );
 
-    return res.json(rows);
-  } catch (err) {
-    console.error("BUNDLES ERROR:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-}
+  await logActivity(req.user.id, "bundle", bundle.id, "create", null, bundle);
+  res.status(201).json(bundle);
+};
 
-// POST /bundles
-async function createBundle(req, res) {
-  const { title, subtitle } = req.body;
+exports.updateBundle = async (req, res) => {
+  const result = await bundleService.updateBundle(
+    req.user.id,
+    req.params.id,
+    req.body
+  );
 
-  if (!title) {
-    return res.status(400).json({ message: "Title is required" });
-  }
+  if (!result) return res.status(404).json({ message: "Bundle not found" });
 
-  try {
-    const userId = req.user.id;
+  await logActivity(
+    req.user.id,
+    "bundle",
+    req.params.id,
+    "update",
+    result.old,
+    result.new
+  );
 
-    const { rows } = await pool.query(
-      "INSERT INTO bundles (user_id, title, subtitle) VALUES ($1, $2, $3) RETURNING *",
-      [userId, title, subtitle || null]
-    );
+  res.json(result.new);
+};
 
-    return res.status(201).json(rows[0]);
-  } catch (err) {
-    console.error("BUNDLE CREATE ERROR:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-}
+exports.deleteBundle = async (req, res) => {
+  const deleted = await bundleService.deleteBundle(req.user.id, req.params.id);
 
-module.exports = {
-  getBundles,
-  createBundle,
+  if (!deleted) return res.status(404).json({ message: "Bundle not found" });
+
+  await logActivity(req.user.id, "bundle", req.params.id, "delete", deleted, null);
+  res.json({ message: "Bundle deleted" });
 };

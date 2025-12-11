@@ -1,17 +1,11 @@
-// src/bundles/bundle.routes.js
 const express = require("express");
-const auth = require("../auth/auth.middleware");
-const {
-  getBundles,
-  createBundle,
-} = require("./bundle.controller");
-
 const router = express.Router();
+const auth = require("../auth/auth.middleware");
+const controller = require("./bundle.controller");
 
-// GET /bundles
-router.get("/", auth, getBundles);
-
-// POST /bundles
-router.post("/", auth, createBundle);
+router.get("/", auth, controller.getBundles);
+router.post("/", auth, controller.createBundle);
+router.put("/:id", auth, controller.updateBundle);
+router.delete("/:id", auth, controller.deleteBundle);
 
 module.exports = router;

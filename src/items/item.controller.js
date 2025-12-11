@@ -1,49 +1,39 @@
-// src/items/item.controller.js
-const pool = require("../config/db");
+const itemService = require("./item.service");
+const { logActivity } = require("../activity/activity.service");
 
-// GET /items
-async function getItems(req, res) {
-  try {
-    const userId = req.user.id;
+exports.getItems = async (req, res) => {
+  const items = await itemService.getItems(req.user.id);
+  res.json(items);
+};
 
-    const { rows } = await pool.query(
-      "SELECT id, name, subtitle, image_url, bundle_id FROM items WHERE user_id = $1",
-      [userId]
-    );
+exports.createItem = async (req, res) => {
+  const item = await itemService.createItem(req.user.id, req.body);
+  await logActivity(req.user.id, "item", item.id, "create", null, item);
+  res.status(201).json(item);
+};
 
-    return res.json(rows);
-  } catch (err) {
-    console.error("ITEMS ERROR:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-}
+exports.updateItem = async (req, res) => {
+  const result = await itemService.updateItem(req.user.id, req.params.id, req.body);
 
-// POST /items
-async function createItem(req, res) {
-  const { name, subtitle, bundle_id, image_url } = req.body;
+  if (!result) return res.status(404).json({ message: "Item not found" });
 
-  if (!name) {
-    return res.status(400).json({ message: "Name is required" });
-  }
+  await logActivity(
+    req.user.id,
+    "item",
+    req.params.id,
+    "update",
+    result.old,
+    result.new
+  );
 
-  try {
-    const userId = req.user.id;
+  res.json(result.new);
+};
 
-    const { rows } = await pool.query(
-      `INSERT INTO items (user_id, name, subtitle, bundle_id, image_url)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [userId, name, subtitle || null, bundle_id || null, image_url || null]
-    );
+exports.deleteItem = async (req, res) => {
+  const deleted = await itemService.deleteItem(req.user.id, req.params.id);
 
-    return res.status(201).json(rows[0]);
-  } catch (err) {
-    console.error("ITEM CREATE ERROR:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-}
+  if (!deleted) return res.status(404).json({ message: "Item not found" });
 
-module.exports = {
-  getItems,
-  createItem,
+  await logActivity(req.user.id, "item", req.params.id, "delete", deleted, null);
+  res.json({ message: "Item deleted" });
 };

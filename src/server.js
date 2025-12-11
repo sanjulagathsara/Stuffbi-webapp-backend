@@ -32,7 +32,7 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
-        console.log("❌ Blocked by CORS:", origin);
+        console.log("Blocked by CORS:", origin);
         return callback(new Error("CORS Not Allowed"), false);
       }
     },
@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/items", itemRoutes);
 app.use("/bundles", bundleRoutes);
-app.use("/profile", profileRoutes); // 👈 profile instead of "users"
+app.use("/profile", profileRoutes);
 
 // Global error handler (optional, but nice to have)
 app.use((err, req, res, next) => {

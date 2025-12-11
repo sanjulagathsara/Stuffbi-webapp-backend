@@ -1,77 +1,110 @@
 // src/profile/profile.controller.js
-const pool = require("../config/db");
+const {
+  getProfileByUserId,
+  updateProfile,
+  deleteUser,
+} = require("./profile.service");
+const { logActivity } = require("../activity/activity.service");
 
-// GET /profile/me
+/**
+ * GET /profile/me
+ */
 exports.getMyProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // from JWT middleware
+    const userId = req.user.id;
+    const profile = await getProfileByUserId(userId);
 
-    const { rows } = await pool.query(
-      `SELECT user_id, display_name, email, avatar_url, phone, created_at, updated_at
-       FROM profiles
-       WHERE user_id = $1`,
-      [userId]
-    );
-
-    if (rows.length === 0) {
+    if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }
 
-    return res.json(rows[0]);
+    return res.json(profile);
   } catch (err) {
-    console.error("Error getting profile:", err);
+    console.error("GET MY PROFILE ERROR:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
 
-// PUT /profile/me
+/**
+ * PUT /profile/me
+ */
 exports.updateMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const { display_name, avatar_url, phone } = req.body;
-
-    const { rows } = await pool.query(
-      `UPDATE profiles
-         SET display_name = COALESCE($1, display_name),
-             avatar_url   = COALESCE($2, avatar_url),
-             phone        = COALESCE($3, phone),
-             updated_at   = NOW()
-       WHERE user_id = $4
-       RETURNING user_id, display_name, email, avatar_url, phone, created_at, updated_at`,
-      [display_name, avatar_url, phone, userId]
-    );
-
-    if (rows.length === 0) {
+    const result = await updateProfile(userId, req.body);
+    if (!result) {
       return res.status(404).json({ message: "Profile not found" });
     }
 
-    return res.json(rows[0]);
+    // log activity
+    await logActivity(
+      userId,
+      "profile",
+      userId,
+      "update",
+      result.old,
+      result.new
+    );
+
+    return res.json(result.new);
   } catch (err) {
-    console.error("Error updating profile:", err);
+    console.error("UPDATE MY PROFILE ERROR:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
 
-// GET /profile/:userId
+/**
+ * GET /profile/:userId  (admin or self)
+ */
 exports.getProfileByUserId = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const requestedId = parseInt(req.params.userId, 10);
 
-    const { rows } = await pool.query(
-      `SELECT user_id, display_name, email, avatar_url, phone, created_at, updated_at
-       FROM profiles
-       WHERE user_id = $1`,
-      [userId]
-    );
+    // Only admin OR the user themselves can access this
+    if (req.user.id !== requestedId && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
 
-    if (rows.length === 0) {
+    const profile = await getProfileByUserId(requestedId);
+
+    if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }
 
-    return res.json(rows[0]);
+    return res.json(profile);
   } catch (err) {
-    console.error("Error getting profile by id:", err);
+    console.error("GET PROFILE BY ID ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * DELETE /profile/me
+ * Hard delete user, cascades to all data
+ */
+exports.deleteMyAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const deletedUser = await deleteUser(userId);
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // log account deletion (it will be deleted too due to cascade, but okay)
+    await logActivity(
+      userId,
+      "user",
+      userId,
+      "delete_account",
+      deletedUser,
+      null
+    );
+
+    return res.json({ message: "Account deleted successfully" });
+  } catch (err) {
+    console.error("DELETE MY ACCOUNT ERROR:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
