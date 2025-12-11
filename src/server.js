@@ -20,7 +20,8 @@ const allowedOrigins = [
   "https://stuffbi-webapp-frontend.vercel.app",          // Vercel production domain
   "http://localhost:8080",                               // Flutter web
   "capacitor://localhost",                               // Flutter iOS/Android
-  "http://localhost",                                    // Mobile debugging
+  "http://localhost", 
+  "http://localhost:5173",                                   // Mobile debugging
 ];
 
 app.use(
