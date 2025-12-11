@@ -15,6 +15,17 @@ async function findUserByEmail(email) {
   return rows[0];
 }
 
+// Create user
+async function createUser(email, hashedPassword) {
+  const { rows } = await pool.query(
+    `INSERT INTO users (email, password_hash)
+     VALUES ($1, $2)
+     RETURNING id, email, role`,
+    [email, hashedPassword]
+  );
+  return rows[0];
+}
+
 // Validate password
 async function validatePassword(inputPassword, hashedPassword) {
   return bcrypt.compare(inputPassword, hashedPassword);
@@ -35,4 +46,5 @@ module.exports = {
   findUserByEmail,
   validatePassword,
   generateToken,
+  createUser,
 };

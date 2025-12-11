@@ -343,3 +343,158 @@ restart backend - pm2 restart backend --update-env
 
 pm2 status
 pm2 logs backend
+
+# Add the sample SQL querries
+
+---
+
+## -- 1. DROP TABLES (order matters because of FK constraints)
+
+DROP TABLE IF EXISTS activity_log CASCADE;
+DROP TABLE IF EXISTS items CASCADE;
+DROP TABLE IF EXISTS bundles CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+---
+
+## -- 2. CREATE USERS TABLE
+
+CREATE TABLE users (
+id SERIAL PRIMARY KEY,
+email VARCHAR(255) UNIQUE NOT NULL,
+password_hash TEXT NOT NULL,
+role VARCHAR(50) DEFAULT 'user',
+created_at TIMESTAMP DEFAULT NOW()
+);
+
+---
+
+## -- 3. CREATE PROFILES TABLE
+
+CREATE TABLE profiles (
+user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+display_name VARCHAR(255),
+avatar_url TEXT,
+phone VARCHAR(50),
+created_at TIMESTAMP DEFAULT NOW(),
+updated_at TIMESTAMP DEFAULT NOW()
+);
+
+---
+
+## -- 4. TRIGGER: AUTO-CREATE PROFILE ON USER CREATION
+
+CREATE OR REPLACE FUNCTION create_default_profile()
+RETURNS TRIGGER AS $$
+BEGIN
+INSERT INTO profiles (user_id, display_name, avatar_url, phone, created_at, updated_at)
+VALUES (NEW.id, NULL, NULL, NULL, NOW(), NOW());
+RETURN NEW;
+END;
+
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_create_profile
+AFTER INSERT ON users
+FOR EACH ROW
+EXECUTE FUNCTION create_default_profile();
+
+------------------------------------------------------------
+-- 5. CREATE BUNDLES TABLE
+------------------------------------------------------------
+CREATE TABLE bundles (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    subtitle VARCHAR(255),
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+------------------------------------------------------------
+-- 6. CREATE ITEMS TABLE
+------------------------------------------------------------
+CREATE TABLE items (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    bundle_id INTEGER REFERENCES bundles(id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    subtitle VARCHAR(255),
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+------------------------------------------------------------
+-- 7. CREATE ACTIVITY LOG TABLE
+------------------------------------------------------------
+CREATE TABLE activity_log (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INTEGER,
+    action VARCHAR(50) NOT NULL,
+    old_value JSONB,
+    new_value JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+------------------------------------------------------------
+-- 8. INSERT ADMIN USER
+------------------------------------------------------------
+-- password: admin@123
+INSERT INTO users (email, password_hash, role)
+VALUES (
+    'admin@gmail.com',
+    '$2b$10$nXk7k2AqfN1nlbP8jZaV2eoM1htTFYA9ResvPbgCVImI.KJ.groupm',
+    'admin'
+);
+
+------------------------------------------------------------
+-- 9. UPDATE ADMIN PROFILE
+------------------------------------------------------------
+UPDATE profiles
+SET
+    display_name = 'Administrator',
+    avatar_url = 'https://example.com/admin.png',
+    phone = '+94710000000',
+    updated_at = NOW()
+WHERE user_id = (SELECT id FROM users WHERE email = 'admin@gmail.com');
+
+------------------------------------------------------------
+-- 10. INSERT SAMPLE BUNDLES WITH IMAGES
+------------------------------------------------------------
+INSERT INTO bundles (user_id, title, subtitle, image_url)
+VALUES
+(1, 'Electronics', 'Gadgets and devices', 'https://cdn-icons-png.flaticon.com/512/1555/1555401.png'),
+(1, 'Travel Gear', 'Things I take on trips', 'https://www.shutterstock.com/image-vector/backpack-icon-school-bag-vector-600nw-711514372.jpg'),
+(1, 'Books', 'My reading list collection', 'https://upload.wikimedia.org/wikipedia/commons/0/06/Atomic_habits.jpg');
+
+------------------------------------------------------------
+-- 11. INSERT SAMPLE ITEMS WITH IMAGES
+------------------------------------------------------------
+INSERT INTO items (user_id, bundle_id, name, subtitle, image_url)
+VALUES
+(1, 1, 'MacBook Pro', '16-inch M1', 'https://cdn-icons-png.flaticon.com/512/22/22791.png'),
+(1, 1, 'iPhone 14', '256GB Purple', 'https://wmstatic.global.ssl.fastly.net/ml/7170625-f-7b458377-aebf-4558-aa7c-e25f40d2a1ad.png'),
+(1, 2, 'Backpack', 'Waterproof', 'https://www.shutterstock.com/image-vector/backpack-icon-school-bag-vector-600nw-711514372.jpg'),
+(1, 3, 'Atomic Habits', 'James Clear', 'https://upload.wikimedia.org/wikipedia/commons/0/06/Atomic_habits.jpg');
+
+------------------------------------------------------------
+-- 12. INSERT SAMPLE ACTIVITY LOGS
+------------------------------------------------------------
+INSERT INTO activity_log (user_id, entity_type, entity_id, action, new_value)
+VALUES
+(1, 'bundle', 1, 'create', '{"title":"Electronics"}'),
+(1, 'item', 1, 'create', '{"name":"MacBook Pro"}'),
+(1, 'profile', 1, 'update', '{"display_name":"Administrator"}');
+
+------------------------------------------------------------
+-- DONE!
+------------------------------------------------------------
+
+SELECT 'Database reset + admin + sample bundles/items created successfully!' AS status;
+$$
