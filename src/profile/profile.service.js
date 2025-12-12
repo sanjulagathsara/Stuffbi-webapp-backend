@@ -31,7 +31,7 @@ async function updateProfile(userId, data) {
            phone        = COALESCE($3, phone),
            updated_at   = NOW()
      WHERE user_id = $4
-     RETURNING user_id, display_name, email, avatar_url, phone, created_at, updated_at`,
+     RETURNING user_id, display_name, avatar_url, phone, created_at, updated_at`,
     [display_name, avatar_url, phone, userId]
   );
 
