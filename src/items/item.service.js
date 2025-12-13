@@ -2,11 +2,12 @@ const pool = require("../config/db");
 
 async function getItems(userId) {
   const { rows } = await pool.query(
-    "SELECT * FROM items WHERE user_id = $1 ORDER BY created_at DESC",
+    "SELECT items.*,bundles.title FROM items Inner Join bundles on items.bundle_id = bundles.id WHERE items.user_id = $1 ORDER BY items.created_at DESC",
     [userId]
   );
   return rows;
 }
+
 
 async function createItem(userId, data) {
   const { name, subtitle, bundle_id, image_url } = data;
