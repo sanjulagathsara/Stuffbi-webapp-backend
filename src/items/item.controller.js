@@ -1,7 +1,5 @@
 const itemService = require("./item.service");
 const { logActivity } = require("../activity/activity.service");
-const itemService = require("./item.service");
-const { logActivity } = require("../activity/activity.service");
 const { presignItemImageUpload } = require("./item.upload.service");
 
 exports.getItems = async (req, res) => {
