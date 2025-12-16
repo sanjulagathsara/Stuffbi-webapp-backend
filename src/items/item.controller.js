@@ -2,7 +2,7 @@ const itemService = require("./item.service");
 const { logActivity } = require("../activity/activity.service");
 const { presignItemImageUpload } = require("./item.upload.service");
 const { getPresignedViewUrlForItem } = require("./item.upload.service");
-const ( presignNewItemImageUpload ) = require("./item.upload.service");
+const { presignNewItemImageUpload } = require("./item.upload.service");
 
 exports.getItems = async (req, res) => {
   const items = await itemService.getItems(req.user.id);
