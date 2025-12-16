@@ -1,5 +1,8 @@
 const itemService = require("./item.service");
 const { logActivity } = require("../activity/activity.service");
+const itemService = require("./item.service");
+const { logActivity } = require("../activity/activity.service");
+const { presignItemImageUpload } = require("./item.upload.service");
 
 exports.getItems = async (req, res) => {
   const items = await itemService.getItems(req.user.id);
@@ -36,4 +39,14 @@ exports.deleteItem = async (req, res) => {
 
   await logActivity(req.user.id, "item", req.params.id, "delete", deleted, null);
   res.json({ message: "Item deleted" });
+};
+
+exports.presignItemImage = async (req, res) => {
+  try {
+    const { contentType } = req.body;
+    const result = await presignItemImageUpload(req.user.id, req.params.id, contentType);
+    res.json(result);
+  } catch (e) {
+    res.status(e.statusCode || 500).json({ message: e.message });
+  }
 };
