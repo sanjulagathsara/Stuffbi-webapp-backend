@@ -1,6 +1,7 @@
 const itemService = require("./item.service");
 const { logActivity } = require("../activity/activity.service");
 const { presignItemImageUpload } = require("./item.upload.service");
+const { getPresignedViewUrlForItem } = require("./item.upload.service");
 
 exports.getItems = async (req, res) => {
   const items = await itemService.getItems(req.user.id);
@@ -43,6 +44,15 @@ exports.presignItemImage = async (req, res) => {
   try {
     const { contentType } = req.body;
     const result = await presignItemImageUpload(req.user.id, req.params.id, contentType);
+    res.json(result);
+  } catch (e) {
+    res.status(e.statusCode || 500).json({ message: e.message });
+  }
+};
+
+exports.getItemImageViewUrl = async (req, res) => {
+  try {
+    const result = await getPresignedViewUrlForItem(req.user.id, req.params.id);
     res.json(result);
   } catch (e) {
     res.status(e.statusCode || 500).json({ message: e.message });

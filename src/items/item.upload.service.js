@@ -51,4 +51,34 @@ async function presignItemImageUpload(userId, itemId, contentType) {
   return { key, uploadUrl, url };
 }
 
-module.exports = { presignItemImageUpload };
+function keyFromUrl(url) {
+  // https://bucket.s3.us-east-1.amazonaws.com/<KEY>
+  const u = new URL(url);
+  return u.pathname.startsWith("/") ? u.pathname.slice(1) : u.pathname;
+}
+
+async function getPresignedViewUrlForItem(userId, itemId) {
+  const { rows } = await pool.query(
+    "SELECT image_url FROM items WHERE id = $1 AND user_id = $2",
+    [itemId, userId]
+  );
+  if (rows.length === 0) {
+    const err = new Error("Item not found");
+    err.statusCode = 404;
+    throw err;
+  }
+  if (!rows[0].image_url) {
+    const err = new Error("Item has no image");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const key = keyFromUrl(rows[0].image_url);
+
+  const cmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
+  const viewUrl = await getSignedUrl(s3, cmd, { expiresIn: 300 }); // 5 min
+
+  return { viewUrl };
+}
+
+module.exports = { presignItemImageUpload, getPresignedViewUrlForItem };
