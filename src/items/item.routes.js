@@ -5,6 +5,9 @@ const controller = require("./item.controller");
 
 router.get("/", auth, controller.getItems);
 router.post("/", auth, controller.createItem);
+
+router.post("/:id/image/presign", auth, controller.presignItemImage);
+
 router.put("/:id", auth, controller.updateItem);
 router.delete("/:id", auth, controller.deleteItem);
 
