@@ -10,6 +10,7 @@ const itemRoutes = require("./items/item.routes");
 const bundleRoutes = require("./bundles/bundle.routes");
 const profileRoutes = require("./profile/profile.routes");
 const activityRoutes = require("./activity/activity.routes");
+const syncRoutes = require("./sync/sync.routes");
 
 const app = express();
 
@@ -21,7 +22,7 @@ const allowedOrigins = [
   "https://stuffbi-webapp-frontend.vercel.app",          // Vercel production domain
   "http://localhost:8080",                               // Flutter web
   "capacitor://localhost",                               // Flutter iOS/Android
-  "http://localhost", 
+  "http://localhost",
   "http://localhost:5173",                                   // Mobile debugging
 ];
 
@@ -59,6 +60,7 @@ app.use("/items", itemRoutes);
 app.use("/bundles", bundleRoutes);
 app.use("/profile", profileRoutes);
 app.use("/activity", activityRoutes);
+app.use("/sync", syncRoutes);
 
 // Global error handler (optional, but nice to have)
 app.use((err, req, res, next) => {
