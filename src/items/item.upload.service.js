@@ -76,7 +76,7 @@ async function getPresignedViewUrlForItem(userId, itemId) {
   const key = keyFromUrl(rows[0].image_url);
 
   const cmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
-  const viewUrl = await getSignedUrl(s3, cmd, { expiresIn: 300 }); // 5 min
+  const viewUrl = await getSignedUrl(s3, cmd, { expiresIn: 7200 }); // 2 hours
 
   return { viewUrl };
 }

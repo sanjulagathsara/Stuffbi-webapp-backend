@@ -100,7 +100,7 @@ async function getPresignedViewUrlForBundle(userId, bundleId) {
 
   const key = keyFromUrl(rows[0].image_url);
   const cmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
-  const viewUrl = await getSignedUrl(s3, cmd, { expiresIn: 300 });
+  const viewUrl = await getSignedUrl(s3, cmd, { expiresIn: 7200 });
 
   return { viewUrl };
 }
