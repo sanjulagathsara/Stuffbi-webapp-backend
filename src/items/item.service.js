@@ -1,10 +1,25 @@
 const pool = require("../config/db");
 
-async function getItems(userId) {
+async function getItems(userId, bundleId = null) {
+  const params = [userId];
+  let where = "WHERE items.user_id = $1";
+
+  if (bundleId) {
+    params.push(bundleId);
+    where += ` AND items.bundle_id = $${params.length}`;
+  }
+
   const { rows } = await pool.query(
-    "SELECT items.*,bundles.title as bundle_title FROM items Inner Join bundles on items.bundle_id = bundles.id WHERE items.user_id = $1 ORDER BY items.created_at DESC",
-    [userId]
+    `
+    SELECT items.*, bundles.title as bundle_title
+    FROM items
+    INNER JOIN bundles ON items.bundle_id = bundles.id
+    ${where}
+    ORDER BY items.created_at DESC
+    `,
+    params
   );
+
   return rows;
 }
 

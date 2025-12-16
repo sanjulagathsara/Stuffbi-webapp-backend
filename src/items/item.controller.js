@@ -69,3 +69,9 @@ exports.getItemImageViewUrl = async (req, res) => {
     res.status(e.statusCode || 500).json({ message: e.message });
   }
 };
+
+exports.getItems = async (req, res) => {
+  const bundleId = req.query.bundle_id ? Number(req.query.bundle_id) : null;
+  const items = await itemService.getItems(req.user.id, bundleId);
+  res.json(items);
+};
