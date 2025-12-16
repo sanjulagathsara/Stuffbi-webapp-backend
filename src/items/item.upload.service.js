@@ -81,4 +81,26 @@ async function getPresignedViewUrlForItem(userId, itemId) {
   return { viewUrl };
 }
 
-module.exports = { presignItemImageUpload, getPresignedViewUrlForItem };
+async function presignNewItemImageUpload(userId, contentType) {
+  if (!BUCKET) throw new Error("S3_BUCKET is not set");
+  if (!ALLOWED.has(contentType)) {
+    const err = new Error("Only jpeg/png/webp images allowed");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const key = `${PREFIX}/items/new/${userId}/${uuidv4()}.${extFromContentType(contentType)}`;
+
+  const cmd = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 });
+  const url = `https://${BUCKET}.s3.${region}.amazonaws.com/${key}`;
+
+  return { key, uploadUrl, url };
+}
+
+module.exports = { presignItemImageUpload, getPresignedViewUrlForItem, presignNewItemImageUpload};
