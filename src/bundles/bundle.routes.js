@@ -8,4 +8,8 @@ router.post("/", auth, controller.createBundle);
 router.put("/:id", auth, controller.updateBundle);
 router.delete("/:id", auth, controller.deleteBundle);
 
+router.post("/image/presign", auth, controller.presignNewBundleImage);
+router.post("/:id/image/presign", auth, controller.presignBundleImage);
+router.get("/:id/image/view-url", auth, controller.getBundleImageViewUrl);
+
 module.exports = router;
