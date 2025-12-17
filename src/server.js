@@ -14,6 +14,11 @@ const syncRoutes = require("./sync/sync.routes");
 
 const app = express();
 
+const morgan = require("morgan");
+
+app.use(morgan("dev"));   // live debugging
+
+
 // -----------------------
 // CORS CONFIGURATION
 // -----------------------
