@@ -1,4 +1,6 @@
 // src/server.js
+// Main server file to set up Express app and routes
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");

@@ -1,4 +1,6 @@
 // src/profile/profile.controller.js
+// Controller functions for profile routes
+
 const {
   getProfileByUserId,
   updateProfile,

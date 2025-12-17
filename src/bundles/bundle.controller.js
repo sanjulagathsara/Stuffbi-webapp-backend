@@ -1,3 +1,6 @@
+// src/bundles/bundle.controller.js
+// Controller functions for bundle routes
+
 const bundleService = require("./bundle.service");
 const { logActivity } = require("../activity/activity.service");
 const {

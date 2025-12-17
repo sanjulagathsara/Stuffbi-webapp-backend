@@ -1,3 +1,7 @@
+// src/sync/sync.controller.js
+// Controller functions for synchronization endpoints
+
+
 const pool = require("../config/db");
 const { logActivity } = require("../activity/activity.service");
 

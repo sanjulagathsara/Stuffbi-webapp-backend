@@ -1,3 +1,6 @@
+// src/sync/sync.routes.js
+// Routes for synchronization endpoints
+
 const express = require("express");
 const router = express.Router();
 const syncController = require("./sync.controller");

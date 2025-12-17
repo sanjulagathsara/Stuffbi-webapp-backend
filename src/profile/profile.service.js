@@ -1,4 +1,6 @@
 // src/profile/profile.service.js
+// Service functions for profile data operations
+
 const pool = require("../config/db");
 
 /**

@@ -1,4 +1,6 @@
 // src/auth/auth.service.js
+// Service functions for authentication: user lookup, password validation, token generation
+
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");

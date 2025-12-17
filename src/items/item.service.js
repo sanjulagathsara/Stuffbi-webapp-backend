@@ -1,3 +1,7 @@
+// src/items/item.service.js
+// Service functions for item data operations
+
+
 const pool = require("../config/db");
 
 async function getItems(userId, bundleId = null) {

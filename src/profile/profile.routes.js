@@ -1,4 +1,6 @@
 // src/profile/profile.routes.js
+// Routes for profile-related endpoints
+
 const express = require("express");
 const router = express.Router();
 

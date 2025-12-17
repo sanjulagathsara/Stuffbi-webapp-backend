@@ -1,3 +1,6 @@
+// src/bundles/bundle.routes.js
+// Routes for bundle-related endpoints
+
 const express = require("express");
 const router = express.Router();
 const auth = require("../auth/auth.middleware");

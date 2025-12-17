@@ -1,4 +1,6 @@
 // src/bundles/bundle.upload.service.js
+// Service functions for bundle image upload and presigning
+
 const { PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { v4: uuidv4 } = require("uuid");

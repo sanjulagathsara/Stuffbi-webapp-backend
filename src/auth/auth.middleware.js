@@ -1,4 +1,6 @@
 // src/auth/auth.middleware.js
+// Middleware to protect routes and verify JWT tokens
+
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 

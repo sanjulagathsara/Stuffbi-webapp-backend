@@ -1,4 +1,6 @@
 // src/auth/auth.controller.js
+// Controller functions for authentication routes
+
 const {
   findUserByEmail,
   createUser,

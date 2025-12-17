@@ -1,3 +1,6 @@
+// src/bundles/bundle.service.js
+// Service functions for bundle data operations
+
 const pool = require("../config/db");
 
 async function getBundles(userId) {
