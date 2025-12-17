@@ -1,4 +1,3 @@
-````markdown
 # StuffBi Web App – Backend
 
 Backend API for the StuffBi web + mobile apps, built with **Node.js / Express** and **PostgreSQL**, deployed on **AWS EC2** with **RDS** and **NGINX + HTTPS**.
@@ -6,6 +5,7 @@ Backend API for the StuffBi web + mobile apps, built with **Node.js / Express** 
 - API base URL (prod): https://apiofstuffbi.sanjulagathsara.com
 
 This backend is **shared** between:
+
 
 - Flutter mobile app
 - Next.js web app (Vercel)
@@ -61,4 +61,4 @@ pm2 start src/server.js --name "stuffbi-api"
 - Node.js v16+
 - PostgreSQL running locally or AWS RDS credentials in `.env`
 - Port 3000 (or configured in `.env`)
-````
+
