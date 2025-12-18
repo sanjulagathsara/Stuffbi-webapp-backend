@@ -11,7 +11,7 @@ async function getBundles(userId) {
   return rows;
 }
 
-async function createBundle(userId, title, subtitle) {
+async function createBundle(userId, title, subtitle, image_url) {
   const { rows } = await pool.query(
     `INSERT INTO bundles (user_id, title, subtitle, image_url)
      VALUES ($1, $2, $3, $4)
