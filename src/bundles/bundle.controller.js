@@ -18,7 +18,8 @@ exports.createBundle = async (req, res) => {
   const bundle = await bundleService.createBundle(
     req.user.id,
     req.body.title,
-    req.body.subtitle
+    req.body.subtitle,
+    req.body.image_url
   );
 
   await logActivity(req.user.id, "bundle", bundle.id, "create", null, bundle);
